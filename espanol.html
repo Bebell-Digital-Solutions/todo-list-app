@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tareas del Día</title>
+  <!-- Add Google Fonts for handwritten feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+    .custom-image-widget {
+      position: fixed !important;
+      top: 50px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      right: 0px;
+      z-index: 999;
+    }
+    
+    .custom-image {
+      width: 70px;
+      height: auto;
+      transition: transform 0.2s;
+    }
+    
+    .custom-image-widget:hover .custom-image {
+      transform: scale(1.05);
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    p {
+      font-size: 18px;
+      text-align: center;
+      color: #333;
+      line-height: 0px;
+      margin-bottom: 30px;
+    }
+    
+    /* Tab controls */
+    .tab-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    /* Scrollable tabs container */
+    .tabs-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      position: relative;
+      width: 100%;
+    }
+    .tabs-scroll {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      flex: 1;
+      padding-bottom: 5px;
+      scroll-behavior: smooth;
+    }
+    .tabs-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .tabs {
+      display: flex;
+      flex-shrink: 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .tab {
+      padding: 10px 15px;
+      cursor: pointer;
+      background: #f1f1f1;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      border-radius: 5px 5px 0 0;
+      margin-right: 5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 10px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .tab.active {
+      background: white;
+      border-bottom: 1px solid white;
+      font-weight: bold;
+      color: #df1783;
+    }
+    .tab:hover {
+      background: #e9e9e9;
+    }
+    .tab-close {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ff4444;
+      color: white;
+      border: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      font-size: 10px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      padding: 0;
+    }
+    .show-close .tab-close {
+      display: flex;
+    }
+    .add-tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      background: #df1783;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+    .add-tab:hover {
+      background: #c0126f;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .edit-tabs {
+      padding: 10px 20px;
+      cursor: pointer;
+      background: #d275b2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+    .edit-tabs:hover {
+      background: #c0126f;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .todo-input {
+      display: flex;
+      margin-bottom: 20px;
+    }
+    #newTodo {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      transition: border 0.2s ease;
+      font-family: "Indie Flower", cursive;
+      font-size: 20px;
+      font-weight: 700;
+      padding-left: 20px;
+    }
+    #newTodo:focus {
+      border-color: #df1783;
+      outline: none;
+    }
+    #addBtn {
+      padding: 10px 20px;
+      background: #df1783;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+    #addBtn:hover {
+      background: #c0126f;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #todoList {
+      list-style: none;
+      padding: 0;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 5px;
+      border-radius: 4px;
+      background: #f9f9f9;
+      transition: all 0.2s ease;
+    }
+    .todo-item:hover {
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .todo-item.completed {
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+    .todo-item input[type="checkbox"] {
+      margin-right: 15px;
+      cursor: pointer;
+    }
+    .todo-text {
+      flex: 1;
+      font-family: "Indie Flower", cursive;
+      font-size: 18px;
+    }
+    .delete-btn {
+      background: #ff4444;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-left: 5px;
+      transition: all 0.2s ease;
+    }
+    .delete-btn:hover {
+      background: #e03e3e;
+    }
+    .date-picker {
+      margin-left: 10px;
+      cursor: pointer;
+      color: #666;
+      transition: all 0.2s ease;
+    }
+    .date-picker:hover {
+      color: #df1783;
+      transform: scale(1.1);
+    }
+    .deadline {
+      font-size: 12px;
+      color: #e74c3c;
+      margin-left: 10px;
+      font-family: Arial, sans-serif;
+    }
+    .scroll-button {
+      background: #df1783;
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      margin: 0 5px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+    .scroll-button:hover {
+      background: #c0126f;
+      transform: scale(1.1);
+    }
+    .scroll-button.visible {
+      display: flex;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding: 15px 0;
+      color: #666;
+      font-size: 14px;
+      border-top: 1px solid #eee;
+    }
+    .footer span {
+      color: #df1783;
+    }
+    .export-pdf {
+      padding: 10px 20px;
+      cursor: pointer;
+      background: #df1783;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+    .export-pdf:hover {
+      background: #c0126f;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .tab-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    /* Add notification styles if not already present */
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 25px;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .notification.show {
+      opacity: 1;
+    }
+    .notification.success {
+      background-color: #4CAF50;
+    }
+    .notification.error {
+      background-color: #f44336;
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="custom-image-widget" style="position: relative; display: inline-block;">
+    <a href="https://bebell-digital-solutions.github.io/basic-tasks-app/">
+      <img class="custom-image" 
+           src="https://bucket.mlcdn.com/a/3336/3336910/images/138f14304ea21715dfae64ae5fe1d71b08c2d451.png" 
+           alt="Traducción al Inglés"
+           style="display: block;">
+    </a>
+  </div>
+
+  <div class="container">
+    <h1>☑️ Tareas del Día</h1>
+    <p>Organiza tus tareas diarias y aumenta tu productividad</p>
+    
+    <div class="tab-controls">
+      <button class="add-tab" id="addTabBtn">+ Nueva Pestaña</button>
+      <button class="edit-tabs" id="editTabsBtn">Editar Pestañas</button>
+      <button class="export-pdf" id="exportPdfBtn">Exportar PDF</button>
+    </div>
+    
+    <div class="tabs-container">
+      <button class="scroll-button" id="scrollLeft">◀</button>
+      <div class="tabs-scroll">
+        <div class="tabs" id="tabsContainer">
+          <div class="tab active" data-tab="default" id="defaultTab">
+            <button class="tab-close">×</button>
+          </div>
+        </div>
+      </div>
+      <button class="scroll-button" id="scrollRight">▶</button>
+    </div>
+    
+    <div class="todo-input">
+      <input type="text" id="newTodo" placeholder="¿Qué tareas tienes hoy?">
+      <button id="addBtn">+ Añadir</button>
+    </div>
+    
+    <ul id="todoList"></ul>
+
+  </div>
+  
+  <div class="footer">
+    Desarrollado con <span>💖</span> por Bebell Digital Solutions.<br>
+    Copyright © 2024 • Todos los derechos reservados
+  </div>
+
+  <!-- Notification element -->
+  <div id="notification" class="notification"></div>
+
+  <!-- Load jsPDF from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize jsPDF
+      const { jsPDF } = window.jspdf;
+      
+      const tabsContainer = document.getElementById('tabsContainer');
+      const tabsScroll = document.querySelector('.tabs-scroll');
+      const addTabBtn = document.getElementById('addTabBtn');
+      const editTabsBtn = document.getElementById('editTabsBtn');
+      const newTodoInput = document.getElementById('newTodo');
+      const addBtn = document.getElementById('addBtn');
+      const todoList = document.getElementById('todoList');
+      const defaultTab = document.getElementById('defaultTab');
+      const scrollLeft = document.getElementById('scrollLeft');
+      const scrollRight = document.getElementById('scrollRight');
+      const exportPdfBtn = document.getElementById('exportPdfBtn');
+      const notification = document.getElementById('notification');
+      const body = document.body;
+
+      let showCloseButtons = false;
+      
+      // Set default tab name to today's date (DD/MM/YYYY)
+      const today = new Date();
+      const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+      defaultTab.textContent = formattedDate;
+      defaultTab.dataset.tab = formattedDate;
+
+      // Initialize todos from localStorage or create new structure
+      let todos = JSON.parse(localStorage.getItem('todos')) || {
+        [formattedDate]: []
+      };
+      let currentTab = formattedDate;
+
+      // Load todos for current tab
+      loadTodos();
+
+      // Show notification
+      function showNotification(message, isSuccess) {
+        notification.textContent = message;
+        notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+          notification.classList.remove('show');
+        }, 3000);
+      }
+
+      // Toggle close buttons
+      editTabsBtn.addEventListener('click', () => {
+        showCloseButtons = !showCloseButtons;
+        body.classList.toggle('show-close', showCloseButtons);
+        editTabsBtn.textContent = showCloseButtons ? 'Terminar Edición' : 'Editar Pestañas';
+      });
+
+      // Check if scroll buttons should be visible
+      function checkScrollButtons() {
+        const tabsWidth = tabsContainer.scrollWidth;
+        const containerWidth = tabsScroll.clientWidth;
+        
+        if (tabsWidth > containerWidth) {
+          scrollLeft.classList.add('visible');
+          scrollRight.classList.add('visible');
+        } else {
+          scrollLeft.classList.remove('visible');
+          scrollRight.classList.remove('visible');
+        }
+      }
+
+      // Scroll buttons functionality
+      scrollLeft.addEventListener('click', () => {
+        tabsScroll.scrollBy(-100, 0);
+      });
+      
+      scrollRight.addEventListener('click', () => {
+        tabsScroll.scrollBy(100, 0);
+      });
+
+      // Add scroll event listener to check buttons visibility
+      tabsScroll.addEventListener('scroll', checkScrollButtons);
+      window.addEventListener('resize', checkScrollButtons);
+
+      // Add new todo
+      addBtn.addEventListener('click', addTodo);
+      newTodoInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTodo();
+      });
+
+      // Add new tab
+      addTabBtn.addEventListener('click', () => {
+        const tabName = prompt('Nombre de la pestaña (o deja en blanco para usar la fecha actual):');
+        const nameToUse = tabName || getCurrentDateFormatted();
+        
+        if (nameToUse) {
+          if (!todos[nameToUse]) {
+            todos[nameToUse] = [];
+            saveTodos();
+            renderTabs();
+            switchTab(nameToUse);
+            // Scroll to the new tab
+            setTimeout(() => {
+              const activeTab = document.querySelector(`.tab[data-tab="${nameToUse}"]`);
+              if (activeTab) {
+                activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }
+              checkScrollButtons();
+            }, 100);
+            showNotification('¡Nueva pestaña creada con éxito! 🎉', true);
+          } else {
+            showNotification('¡Esta pestaña ya existe!', false);
+          }
+        }
+      });
+
+      // Export to PDF - WORKING VERSION WITH TABLE FORMAT
+      exportPdfBtn.addEventListener('click', exportToPDF);
+
+      function exportToPDF() {
+        try {
+          // Check if there are tasks to export
+          if (!todos[currentTab] || todos[currentTab].length === 0) {
+            showNotification('🚨 ¡No hay tareas para exportar en esta pestaña!', false);
+            return;
+          }
+          
+          // Create a new PDF document
+          const doc = new jsPDF({
+            orientation: "portrait",
+            unit: "mm"
+          });
+          
+          // Add title and metadata
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(20);
+          doc.setTextColor(60, 60, 60);
+          doc.text("Tareas del Día", 105, 20, { align: "center" });
+          
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(12);
+          doc.setTextColor(100, 100, 100);
+          doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 105, 28, { align: "center" });
+          doc.text(`Pestaña: ${currentTab}`, 105, 34, { align: "center" });
+          
+          // Prepare table data
+          const headers = [["Estado", "Tarea", "Fecha Límite"]];
+          const rows = todos[currentTab].map(task => {
+            const status = task.completed ? "Completada" : ""; // Just checkmark for completed
+            const deadline = task.deadline 
+              ? new Date(task.deadline).toLocaleDateString() 
+              : "Sin fecha";
+            
+            return [status, task.text, deadline];
+          });
+          
+          // Table styling
+          doc.autoTable({
+            startY: 40,
+            head: headers,
+            body: rows,
+            theme: "grid",
+            headStyles: {
+              fillColor: [223, 23, 131], // Pink color
+              textColor: 255,
+              fontStyle: "bold",
+              halign: "center"
+            },
+            columnStyles: {
+              0: { 
+                cellWidth: 20, 
+                halign: "center",
+                fontStyle: "bold",
+                fontSize: 9
+              },
+              1: { 
+                cellWidth: "auto",
+                textColor: (rowData, column, rowIndex) => {
+                  return todos[currentTab][rowIndex].completed ? [150, 150, 150] : [0, 0, 0];
+                }
+              },
+              2: { 
+                cellWidth: 30, 
+                halign: "center"
+              }
+            },
+            styles: {
+              fontSize: 10,
+              cellPadding: 3,
+              overflow: "linebreak",
+              valign: "middle"
+            },
+            didDrawPage: function(data) {
+              // Footer - centered
+              doc.setFontSize(10);
+              doc.setTextColor(150);
+              const footerText = "Desarrollado por Bebell Digital Solutions";
+              const pageWidth = doc.internal.pageSize.width;
+              const textWidth = doc.getStringUnitWidth(footerText) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+              const xPos = (pageWidth - textWidth) / 2; // Calculate center position
+              
+              doc.text(
+                footerText,
+                xPos, // Center position
+                doc.internal.pageSize.height - 10 // Same vertical position
+              );
+            }
+          });
+          
+          // Save the PDF
+          const fileName = `Tareas_${currentTab.replace(/\//g, "-")}.pdf`;
+          doc.save(fileName);
+          showNotification("¡PDF exportado con éxito! 🎉", true);
+          
+        } catch (error) {
+          console.error("🚨 Error al exportar PDF:", error);
+          showNotification("Error al generar PDF. Por favor, inténtalo de nuevo.", false);
+        }
+      }
+
+      // Helper: Format date as DD/MM/YYYY
+      function getCurrentDateFormatted() {
+        const date = new Date();
+        return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+      }
+
+      // Render tabs
+      function renderTabs() {
+        tabsContainer.innerHTML = '';
+        Object.keys(todos).forEach(tab => {
+          const tabEl = document.createElement('div');
+          tabEl.className = `tab ${tab === currentTab ? 'active' : ''}`;
+          tabEl.textContent = tab;
+          tabEl.dataset.tab = tab;
+          tabEl.addEventListener('click', () => switchTab(tab));
+          
+          // Add close button
+          const closeBtn = document.createElement('button');
+          closeBtn.className = 'tab-close';
+          closeBtn.innerHTML = '×';
+          closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteTab(tab);
+          });
+          
+          tabEl.appendChild(closeBtn);
+          tabsContainer.appendChild(tabEl);
+        });
+        checkScrollButtons();
+      }
+
+      // Delete tab
+      function deleteTab(tabName) {
+        if (Object.keys(todos).length <= 1) {
+          showNotification('¡Debe haber al menos una pestaña!', false);
+          return;
+        }
+        
+        if (confirm(`¿Estás seguro de que quieres eliminar la pestaña "${tabName}" y todas sus tareas?`)) {
+          delete todos[tabName];
+          saveTodos();
+          
+          // Switch to another tab if deleting current tab
+          if (currentTab === tabName) {
+            const remainingTabs = Object.keys(todos);
+            currentTab = remainingTabs[0];
+          }
+          
+          renderTabs();
+          loadTodos();
+          showNotification('¡Pestaña eliminada con éxito! 🗑️', true);
+        }
+      }
+
+      // Switch between tabs
+      function switchTab(tab) {
+        currentTab = tab;
+        renderTabs();
+        loadTodos();
+      }
+
+      // Load todos for current tab
+      function loadTodos() {
+        todoList.innerHTML = '';
+        if (todos[currentTab]) {
+          todos[currentTab].forEach((todo, index) => {
+            const todoEl = createTodoElement(todo, index);
+            todoList.appendChild(todoEl);
+          });
+        }
+      }
+
+      // Add new todo
+      function addTodo() {
+        const text = newTodoInput.value.trim();
+        if (text) {
+          if (!todos[currentTab]) {
+            todos[currentTab] = [];
+          }
+          todos[currentTab].push({
+            text,
+            completed: false,
+            deadline: null
+          });
+          saveTodos();
+          newTodoInput.value = '';
+          loadTodos();
+          showNotification('¡Tarea añadida con éxito! 🎉', true);
+        }
+      }
+
+      // Create todo element
+      function createTodoElement(todo, index) {
+        const li = document.createElement('li');
+        li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = todo.completed;
+        checkbox.addEventListener('change', () => toggleTodo(index));
+        
+        const todoText = document.createElement('span');
+        todoText.className = 'todo-text';
+        todoText.textContent = todo.text;
+        
+        const datePicker = document.createElement('span');
+        datePicker.className = 'date-picker';
+        datePicker.innerHTML = '📅';
+        datePicker.addEventListener('click', () => setDeadline(index));
+        
+        const deadlineText = document.createElement('span');
+        deadlineText.className = 'deadline';
+        if (todo.deadline) {
+          const deadlineDate = new Date(todo.deadline);
+          const formattedDeadline = `${String(deadlineDate.getDate()).padStart(2, '0')}/${String(deadlineDate.getMonth() + 1).padStart(2, '0')}/${deadlineDate.getFullYear()}`;
+          deadlineText.textContent = `Vence: ${formattedDeadline}`;
+        }
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.textContent = 'Eliminar';
+        deleteBtn.addEventListener('click', () => deleteTodo(index));
+        
+        li.appendChild(checkbox);
+        li.appendChild(todoText);
+        li.appendChild(datePicker);
+        li.appendChild(deadlineText);
+        li.appendChild(deleteBtn);
+        
+        return li;
+      }
+
+      // Toggle todo completion
+      function toggleTodo(index) {
+        todos[currentTab][index].completed = !todos[currentTab][index].completed;
+        saveTodos();
+        loadTodos();
+        showNotification('¡Estado de tarea actualizado!', true);
+      }
+
+      // Delete todo
+      function deleteTodo(index) {
+        todos[currentTab].splice(index, 1);
+        saveTodos();
+        loadTodos();
+        showNotification('¡Tarea eliminada con éxito!', true);
+      }
+
+      // Set deadline
+      function setDeadline(index) {
+        const dateStr = prompt('Fecha límite (DD/MM/YYYY):');
+        if (dateStr) {
+          const [day, month, year] = dateStr.split('/');
+          const date = new Date(`${year}-${month}-${day}`);
+          
+          if (!isNaN(date.getTime())) {
+            todos[currentTab][index].deadline = date.toISOString();
+            saveTodos();
+            loadTodos();
+            showNotification('¡Fecha límite establecida con éxito!', true);
+          } else {
+            showNotification('¡Formato de fecha inválido! Usa DD/MM/YYYY.', false);
+          }
+        }
+      }
+
+      // Save todos to localStorage
+      function saveTodos() {
+        localStorage.setItem('todos', JSON.stringify(todos));
+      }
+
+      // Initial render
+      renderTabs();
+    });
+  </script>
+</body>
+</html>
